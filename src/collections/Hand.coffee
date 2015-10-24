@@ -5,10 +5,33 @@ class window.Hand extends Backbone.Collection
 
   hit: ->
     @add(@deck.pop())
+    if @checkBust()
+      @trigger 'bust', @
+  ,
+
+  stand: ->
+    @trigger 'stand', @
+  ,
+
+  dealersPlay: ->
+    @first().flip()
+    while @scores()[0] < 15
+      @hit()
+    if !@checkBust()
+      @stand()
+  ,
+
+  checkBust: ->
+    @scores()[0] > 21
+  ,
 
   hasAce: -> @reduce (memo, card) ->
     memo or card.get('value') is 1
   , 0
+
+  maxScore: ->
+    if @scores()[1] <= 21 then @scores()[1] else @scores()[0]
+  ,
 
   minScore: -> @reduce (score, card) ->
     score + if card.get 'revealed' then card.get 'value' else 0
